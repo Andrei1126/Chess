@@ -1,0 +1,93 @@
+Adrian Ioan Draghicescu 321CB
+Alexandru Madalin Vasilescu 321CB
+Andrei Ion Micut 321CB
+
+Am trecut pe C++ din Java. Am modificat structura din matrice intr-un vector.
+Prima data am scris in C si cand am trecut in C++ am pastrat unele functii exact asa cum erau.
+
+In def.h am declarat toate strcturile. Avem la inceput niste enumuri. 
+Primul enum are tipurile de piese de pe tabla (de la empty la bk(black king)).
+Al doilea enum reprezinta coloanele tablei de sah.
+Al treila enum cu RANK_X reprezinta liniile tablei de sah.
+Al 4-lea enum reprezina culorile posibile de sah.(Both l-am folosit pentru tratarea erorilor)
+Al 5-lea enum este doar un {False, True}. L-am pastrat cand am trecut din C. De asemenea in attack.cpp sunt folositi in niste vectori gasiti in diverse documentatii online. 
+Al 6-lea reprezinta tipurile de rocada.
+
+Avem comentata linia cu debug. Am folosit niste functii de assert create initial in C pentru tratarea erorilor. Daca debugul ar fi definit functiile de assert functioneaza daca nu, nu functioneaza. Degubul activat incetineste programul.
+Macroul FR2SQ primeste o linie si o coloana si intoarce pozitia in vectorul nostru care pastreaza table.
+Macro-ul SQ64 primeste un index pentru un vector de 120(tabla de joc extinsa) si intoarce un index pentru un vector de 64(adica doar tabla de joc). Macroul SQ120 este inversul functiei.
+Macroul NOMOVE reprezinta un contructor pentru Move care initializeaza tot la 0.
+
+Clasa Move contine campurile: 
+from(de unde pleaca piesa) 
+to(unde ajunge piesa)
+captured(ce piesa a fost capturata, daca a fost capturata o piesa)
+enPas(daca a fost realizata o captura en Passant)
+promotion(daca s-a facut o promovare de pion in regina (sau altceva). Pastreaza si in ce piesa s-a promovat, in caz ca se poate promova si in altceva decat regina)
+pawnStart(daca pionul a facut start cu 2 patratele)
+castle(daca se poate face o rocada)
+score(score-ul unei mutari)
+Apoi am niste contructori(fara parametri, doar cu cativa parametri sau cu toti) si o functie de compareTo.
+
+Clasa Undo contine campurile:
+move(miscarea realizata anterior)
+castlePerm (tipurile de rocada)
+fiftyMoves (daca s-au realizat 50 de miscari fara captura(ceea ce ar duce la egal))
+hashKey(Key-ul anterior mutari)
+
+Clasa Board contine campurile:
+pieces(un vector care tine tabla. in centru este tabla de joc(64 de valori). Pe margine sunt pozitii de OFFBOARD)
+side(culoarea piesei)
+enPas(reprezinta pozitia care trebuie facuta pentru a face captura de tip en Passant)
+fiftyMoves(verifica daca se ajunge sa se faca 50 de mutari fara captura(ceea ce ar duce la egalitate))
+castlePerm(tipul de rocada)
+ply(numarul de mutari realizate pana acum)
+hisply(numarul de mutari realizate in history)
+hashKey(La fiecare Board este generat aleator un hashKey. Doua Boarduri identice ar trebuie sa aiba hashKey egal)
+pcsNum(vector care retine cate piese mai sunt de fiecare(13 numarul de tipuri de piese de la white pawn la black king in primul enum))
+
+bigPcs(numarul de piese in afara de pioni)
+majPcs(numarul de piese mari(regina,rege,tura))
+minPcs(numarul de piese mici(nebun si cal))
+Toti 3 sunt vectori care au 2 elemente unul pentru fiecare culoare. Nu le-am folosit etapa aceasta dar le-am pastrat pentru etapa urmatoare.
+
+material(valoarea adunata a tuturor pieselor, fiecare piesa avand un scor)
+pList(este un hashTable unde primul indice este tipul piesei(de la wP la bK), iar al doilea este indicele elementului din lista, in fiecare lista este tinuta pozitia din vectorul de pieces unde se afla piesele)
+vectorul de history e pentru a pastra valorile de Undo
+
+Valorile externe sunt definite prin fisierele cpp. 
+Sq120ToSq64 si Sq64ToSq120 sunt vectori pentru a transforma un indice din 120 in 64 si invers.
+KnDir, RkDir, BiDir si KiDir reprezinta vectori cu pozitile unde se poate muta fiecare tip de pieasa.
+pieceVal reprezinta cat valoreaza fiecare tip de piesa.
+isPieceBig, isPieceMaj si isPieceMin sunt vectori care arata daca fiecare piesa este sau nu de un anumit tip.(nefolosita inca).
+
+generateHashKey genereaza key-ul pentru ficare Board.(init.cpp)
+allInit initializeaza toate valorile.(init.cpp)
+updateListMaterial recalculeaza vectorul material.
+sqAttacked verifica daca un patrat de pe tabla este atacat de inamic.
+makeMove si undoMove fac mutarile pe tabla.(move.cpp)
+parseFen intializeaza boardul cu valoare de start. Am folosit mai multe tipuri de FEN care imi intializa tabla cu anumite mutari de le voiam fara sa le fac eu de mana(idea cu FEN-uri a fost inspirata din surse online).
+evalPosition evalueaza o pozitie. Nu este in cea mai buna stare.
+negamax nu mai este folosit acum fiind inlocuit de alphaBetaNegamax dar l-am pastrat pentru ca l-am folosit la inceput.
+alphaBetaNegamax genereaza cea mai buna mutare de la un anumit moment.
+
+prMove intoarce valoare unui move pentru a fi trimis la xboard (de exemplu a2a4)
+
+sqOnBoard verifica daca un patrat este in interiorul tablei.
+sideValid verifica daca culoarea este negru sau alb.
+peiceValid verifica daca o piese este intre wP si bK.
+checkBoard verifica tot board-ul.
+
+Asserturile sunt folosite pentru DEBUG.
+
+Andrei Micut a lucrat la main si a facut attack.cpp
+Alexandru Vasilescu si Adrian Draghicescu au facut impreuna move.cpp, moveGenerator.cpp, alpha-beta.cpp, board.cpp si eval.cpp . De asemenea au facut comentariile si README-ul.
+Adrian Draghicescu a facut si toate functiile din io.cpp, init.cpp si a venit cu ideile.
+
+
+Cand am dat comanda de pe ocw am primit urmatoare eroare prima data.
+xboard -fcp "make run" -scp "fairymax" -secondInitString "new\nrandom\nsd 2\n" -tc 5 -inc 2 -autoCallFlag true -mg 10 -sgf partide.txt -reuseFirst false -debug
+X Error of failed request:  BadMatch (invalid parameter attributes)
+  Major opcode of failed request:  42 (X_SetInputFocus)
+  Serial number of failed request:  344
+  Current serial number in output stream:  361
